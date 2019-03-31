@@ -3,28 +3,40 @@
 
 import sys
 import random
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
 
 cmd = None
 debug = False
 seed = 20160930
 alpha = 3.0
 
+# py3 = sys.version_info.major == '(3,)',
+# print(py3)
+# print(py3 == True)
+# print(sys.version_info)
+# print(xrange)
+# if !xrange:
+#     xrange = range
+xrange = range
+
 if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) < 2:
-        print 'Usage: python bwm.py <cmd> [arg...] [opts...]'
-        print '  cmds:'
-        print '    encode <image> <watermark> <image(encoded)>'
-        print '           image + watermark -> image(encoded)'
-        print '    decode <image> <image(encoded)> <watermark>'
-        print '           image + image(encoded) -> watermark'
-        print '  opts:'
-        print '    --debug,          Show debug'
-        print '    --seed <int>,     Manual setting random seed (default is 20160930)'
-        print '    --alpha <float>,  Manual setting alpha (default is 3.0)'
+        print('Usage: python bwm.py <cmd> [arg...] [opts...]')
+        print('  cmds:')
+        print('    encode <image> <watermark> <image(encoded)>')
+        print('           image + watermark -> image(encoded)')
+        print('    decode <image> <image(encoded)> <watermark>')
+        print('           image + image(encoded) -> watermark')
+        print('  opts:')
+        print('    --debug,          Show debug')
+        print('    --seed <int>,     Manual setting random seed (default is 20160930)')
+        print('    --alpha <float>,  Manual setting alpha (default is 3.0)')
         sys.exit(1)
     cmd = sys.argv[1]
     if cmd != 'encode' and cmd != 'decode':
-        print 'Wrong cmd %s' % cmd
+        print('Wrong cmd %s' % cmd)
         sys.exit(1)
     if '--debug' in sys.argv:
         debug = True
@@ -32,7 +44,7 @@ if __name__ == '__main__':
     if '--seed' in sys.argv:
         p = sys.argv.index('--seed')
         if len(sys.argv) <= p+1:
-            print 'Missing <int> for --seed'
+            print('Missing <int> for --seed')
             sys.exit(1)
         seed = int(sys.argv[p+1])
         del sys.argv[p+1]
@@ -40,21 +52,19 @@ if __name__ == '__main__':
     if '--alpha' in sys.argv:
         p = sys.argv.index('--alpha')
         if len(sys.argv) <= p+1:
-            print 'Missing <float> for --alpha'
+            print('Missing <float> for --alpha')
             sys.exit(1)
         alpha = float(sys.argv[p+1])
         del sys.argv[p+1]
         del sys.argv[p]
     if len(sys.argv) < 5:
-        print 'Missing arg...'
+        print('Missing arg...')
         sys.exit(1)
     fn1 = sys.argv[2]
     fn2 = sys.argv[3]
     fn3 = sys.argv[4]
 
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 # OpenCV是以(BGR)的顺序存储图像数据的
 # 而Matplotlib是以(RGB)的顺序显示图像的
@@ -63,7 +73,7 @@ def bgr_to_rgb(img):
     return cv2.merge([r, g, b])
 
 if cmd == 'encode':
-    print 'image<%s> + watermark<%s> -> image(encoded)<%s>' % (fn1, fn2, fn3)
+    print('image<%s> + watermark<%s> -> image(encoded)<%s>' % (fn1, fn2, fn3))
     img = cv2.imread(fn1)
     wm = cv2.imread(fn2)
 
@@ -85,8 +95,9 @@ if cmd == 'encode':
 
     random.seed(seed)
     m, n = range(hwm.shape[0]), range(hwm.shape[1])
-    random.shuffle(m)
-    random.shuffle(n)
+    random.shuffle(list(range(len(m))))
+    random.shuffle(list(range(len(n))))
+    # random.shuffle(n)
     for i in xrange(hwm.shape[0]):
         for j in xrange(hwm.shape[1]):
             hwm[i][j] = hwm2[m[i]][n[j]]
@@ -123,7 +134,7 @@ if cmd == 'encode':
             for k in xrange(img_wm.shape[2]):
                 sum += np.power(img_wm[i][j][k] - img_wm2[i][j][k], 2)
     miss = np.sqrt(sum) / (img_wm.shape[0] * img_wm.shape[1] * img_wm.shape[2]) * 100
-    print 'Miss %s%% in save' % miss
+    print('Miss %s%% in save' % miss)
 
     if debug:
         plt.subplot(233), plt.imshow(bgr_to_rgb(np.uint8(img_wm))), \
@@ -151,7 +162,7 @@ if cmd == 'encode':
         plt.show()
 
 elif cmd == 'decode':
-    print 'image<%s> + image(encoded)<%s> -> watermark<%s>' % (fn1, fn2, fn3)
+    print('image<%s> + image(encoded)<%s> -> watermark<%s>' % (fn1, fn2, fn3))
     img = cv2.imread(fn1)
     img_wm = cv2.imread(fn2)
 
@@ -163,8 +174,10 @@ elif cmd == 'decode':
 
     random.seed(seed)
     m, n = range(int(img.shape[0] * 0.5)), range(img.shape[1])
-    random.shuffle(m)
-    random.shuffle(n)
+    # random.shuffle(m)
+    # random.shuffle(n)
+    random.shuffle(list(range(len(m))))
+    random.shuffle(list(range(len(n))))
 
     f1 = np.fft.fft2(img)
     f2 = np.fft.fft2(img_wm)

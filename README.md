@@ -52,3 +52,6 @@
         --debug,          Show debug
         --seed <int>,     Manual setting random seed (default is 20160930)
         --alpha <float>,  Manual setting alpha (default is 3.0)
+
+### New
+兼容python3语法
