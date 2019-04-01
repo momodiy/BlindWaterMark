@@ -4,6 +4,7 @@
 import sys
 import random
 import cv2
+import keyword
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -12,6 +13,9 @@ debug = False
 seed = 20160930
 alpha = 3.0
 
+py3 = keyword.iskeyword('True')
+print(keyword.iskeyword('True'))
+print(py3)
 # py3 = sys.version_info.major == '(3,)',
 # print(py3)
 # print(py3 == True)
@@ -19,7 +23,8 @@ alpha = 3.0
 # print(xrange)
 # if !xrange:
 #     xrange = range
-xrange = range
+if py3:
+    xrange = range
 
 if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv or len(sys.argv) < 2:
@@ -95,8 +100,13 @@ if cmd == 'encode':
 
     random.seed(seed)
     m, n = range(hwm.shape[0]), range(hwm.shape[1])
-    random.shuffle(list(range(len(m))))
-    random.shuffle(list(range(len(n))))
+
+    if py3:
+        random.shuffle(list(range(len(m))))
+        random.shuffle(list(range(len(n))))
+    else:
+        random.shuffle(m)
+        random.shuffle(n)
     # random.shuffle(n)
     for i in xrange(hwm.shape[0]):
         for j in xrange(hwm.shape[1]):
@@ -174,10 +184,14 @@ elif cmd == 'decode':
 
     random.seed(seed)
     m, n = range(int(img.shape[0] * 0.5)), range(img.shape[1])
-    # random.shuffle(m)
-    # random.shuffle(n)
-    random.shuffle(list(range(len(m))))
-    random.shuffle(list(range(len(n))))
+
+    if py3:
+        random.shuffle(list(range(len(m))))
+        random.shuffle(list(range(len(n))))
+    else:
+        random.shuffle(m)
+        random.shuffle(n)
+
 
     f1 = np.fft.fft2(img)
     f2 = np.fft.fft2(img_wm)
